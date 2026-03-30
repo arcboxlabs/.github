@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ArcBox Banner Generator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+        /*
+    Brand colors from tailwind.css (oklch → hex approximations):
+    --background:        oklch(0.08 0 0)    ≈ #141414
+    --foreground:        oklch(0.985 0 0)   ≈ #fafafa
+    --card:              oklch(0.13 0 0)    ≈ #212121
+    --accent:            oklch(0.7 0.16 45) ≈ oklch(0.7 0.16 45)  (warm amber/orange)
+    --muted-foreground:  oklch(0.65 0 0)    ≈ #999999
+    --border:            oklch(0.28 0 0)    ≈ #414141
+    --secondary:         oklch(0.22 0 0)    ≈ #333333
+  */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 48px;
+            padding: 48px;
+        }
+
+        .label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        /* ─── GitHub Profile README Banner ─── */
+        /* 1280 × 320 */
+        .banner {
+            width: 1280px;
+            height: 320px;
+            background-color: #141414;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 0 80px;
+        }
+
+        .banner .shader-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .banner-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .banner-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .banner-logo {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #fafafa;
+        }
+
+        .banner-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .banner-headline {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fafafa;
+            letter-spacing: -0.02em;
+        }
+
+        .banner-tagline {
+            font-size: 16px;
+            font-weight: 400;
+            color: #999;
+            text-align: right;
+            line-height: 1.5;
+            max-width: 480px;
+        }
+
+        .banner-url {
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'IBM Plex Mono', monospace;
+            color: oklch(0.7 0.16 45);
+            letter-spacing: 0.02em;
+            margin-top: 2px;
+        }
+
+        /* ─── OpenGraph Image ─── */
+        /* 1200 × 630 */
+        .og {
+            width: 1200px;
+            height: 630px;
+            background-color: #141414;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .og .shader-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        .og-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .og-logo {
+            font-size: 80px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: #fafafa;
+        }
+
+        .og-headline {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fafafa;
+            letter-spacing: -0.02em;
+            text-align: center;
+        }
+
+        .og-desc {
+            font-size: 18px;
+            color: #999;
+            max-width: 640px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .og-url {
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'IBM Plex Mono', monospace;
+            color: oklch(0.7 0.16 45);
+            letter-spacing: 0.02em;
+            margin-top: 8px;
+        }
+
+        .og-meta {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            z-index: 1;
+        }
+
+        .og-meta-dot {
+            background-color: oklch(0.7 0.16 45);
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .og-meta span {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .og-meta span:first-child::before {
+            display: none;
+        }
+
+        /* ─── Accent color helper ─── */
+        .accent {
+            color: oklch(0.7 0.16 45);
+        }
+
+        /* ─── Social links row ─── */
+        .socials {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .socials a, .socials span {
+            color: #888;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 16px;
+        }
+
+        .socials i {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .socials i::before {
+            font-size: 14px;
+            color: #666;
+            vertical-align: -3px;
+        }
+
+        /* Banner socials */
+        .banner-socials {
+            margin-top: 6px;
+        }
+
+        /* OG socials */
+        .og-socials {
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ─── GitHub Profile README Banner (1280×320) ─── -->
+    <div>
+        <div class="label">GitHub Profile Banner — 1280 × 320</div>
+        <div class="banner" id="banner">
+            <div class="shader-bg" id="banner-shader"></div>
+            <div class="banner-content">
+                <div class="banner-left">
+                    <div class="banner-logo"><span class="accent">ArcBox</span> Labs</div>
+                </div>
+                <div class="banner-right">
+                    <div class="banner-headline">Containers<span class="accent">.</span> VMs<span class="accent">.</span> Sandboxes<span class="accent">.</span></div>
+                    <div class="banner-tagline">High-performance container and VM runtime.</div>
+                    <div class="banner-url">https://arcbox.dev</div>
+                    <div class="socials banner-socials">
+                        <span><i class="fa-brands fa-twitter"></i> @arcboxlabs</span>
+                        <span><i class="fa-brands fa-github"></i> arcboxlabs</span>
+                        <span><i class="fa-brands fa-discord"></i> Discord</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── OpenGraph Image (1200×630) ─── -->
+    <div>
+        <div class="label">OpenGraph Image — 1200 × 630</div>
+        <div class="og" id="og">
+            <div class="shader-bg" id="og-shader"></div>
+            <div class="og-content">
+                <div class="og-logo"><span class="accent">ArcBox</span> Labs</div>
+                <div class="og-headline">Containers<span class="accent">.</span> VMs<span class="accent">.</span> Sandboxes<span class="accent">.</span></div>
+                <div class="og-desc">High-performance container and VM runtime.</div>
+                <div class="og-url">https://arcbox.dev</div>
+                <div class="socials og-socials">
+                    <span><i class="fa-brands fa-twitter"></i> @arcboxlabs</span>
+                    <span><i class="fa-brands fa-github"></i> arcboxlabs</span>
+                    <span><i class="fa-brands fa-discord"></i> arcbox.link/discord</span>
+                </div>
+            </div>
+            <div class="og-meta">
+                <span>Open Source</span>
+                <span class="og-meta-dot"></span>
+                <span>Containers</span>
+                <span class="og-meta-dot"></span>
+                <span>Firecracker microVMs</span>
+                <span class="og-meta-dot"></span>
+                <span>Sandboxes</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            ShaderMount,
+            neuroNoiseFragmentShader,
+            imageDitheringFragmentShader,
+            getShaderColorFromString,
+            ShaderFitOptions,
+        } from 'https://cdn.jsdelivr.net/npm/@paper-design/shaders@0.0.72/dist/index.js';
+
+        // ─── Banner: Neuro Noise background ───
+        const bannerEl = document.getElementById('banner-shader');
+        const bannerShader = new ShaderMount(
+            bannerEl,
+            neuroNoiseFragmentShader,
+            {
+                u_colorFront: getShaderColorFromString('#c06a20'),  // accent amber
+                u_colorHighlight: getShaderColorFromString('#e8943c'),
+                u_colorBack: getShaderColorFromString('#00000000'),  // background
+                u_originalColors: true,
+                u_brightness: 0.3,
+                u_contrast: 0.6,
+                u_inverted: false,
+                // pattern sizing
+                u_scale: 1.0,
+                u_rotation: 0,
+                u_offsetX: 0,
+                u_offsetY: 0,
+                u_originX: 0.5,
+                u_originY: 0.5,
+                u_worldWidth: 0,
+                u_worldHeight: 0,
+                u_fit: ShaderFitOptions.none,
+            },
+            undefined, // webgl context attributes
+            0.3,       // speed (slow animation)
+            0,         // initial frame
+        );
+
+        // ─── OG Image: Image Dithering with hero-shader-icon.svg ───
+        const ogEl = document.getElementById('og-shader');
+
+        // Load the SVG icon as an image
+        const heroImg = new Image();
+        heroImg.crossOrigin = 'anonymous';
+        heroImg.src = './hero-shader-icon.svg';
+        heroImg.onload = () => {
+            const ogShader = new ShaderMount(
+                ogEl,
+                imageDitheringFragmentShader,
+                {
+                    u_image: heroImg,
+                    u_colorFront: getShaderColorFromString('#c06a20'),  // accent amber
+                    u_colorHighlight: getShaderColorFromString('#e8943c'),
+                    u_colorBack: getShaderColorFromString('#00000000'),  // background
+                    u_originalColors: true,
+                    u_inverted: false,
+                    u_type: 4,       // 8x8 bayer dithering
+                    u_pxSize: 2,
+                    u_colorSteps: 3,
+                    // sizing
+                    u_scale: 0.6,
+                    u_rotation: 0,
+                    u_offsetX: 0,
+                    u_offsetY: 0,
+                    u_originX: 0.5,
+                    u_originY: 0.5,
+                    u_worldWidth: 0,
+                    u_worldHeight: 0,
+                    u_fit: ShaderFitOptions.contain,
+                },
+                undefined,
+                0,    // speed (static)
+                0,
+            );
+        };
+    </script>
+
+</body>
+
+</html>
